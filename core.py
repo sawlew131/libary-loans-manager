@@ -19,4 +19,3 @@ class Library:
         pass
     def show_all(self):
         pass
-    
