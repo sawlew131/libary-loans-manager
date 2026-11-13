@@ -19,11 +19,10 @@ class Node:
 class Library:
     def __init__(self):
         self.root = None
-
+        self.loans = {}
     def insert(self, book):
         # Public method - calls the private helper
         self.root = self._insert(self.root, book)
-
     def _insert(self, node, book):
         if node is None:
             return Node(book)
@@ -46,7 +45,25 @@ class Library:
             else:
                 node = node.right
         return None
-
+    
+    def borrow_book(self, book_id, borrower):
+        book = self.find(book_id)
+        if book is None:
+            return False
+        if book.copies > 0:
+            book.copies -=1
+            self.loans[book_id] = borrower
+            return True
+        return False
+    
+    def return_book(self,book_id):
+        if book_id not in self.loans:
+            return False
+        book = self.find(book_id)
+        book.copies += 1
+        del self.loans[book_id]
+        return True
+    
     def show_all(self):
         books = []
         self._inorder(self.root, books)
