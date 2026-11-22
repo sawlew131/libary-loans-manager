@@ -41,10 +41,39 @@ class LibraryGUI:
         bottom = ttk.Frame(root, padding=10)
         bottom.pack(fill="x")
 
-        ttk.Button(bottom, text="Add Book").pack(side="left", padx=3)
+        ttk.Button(bottom, text="Add Book", command=self.add_book).pack(side="left", padx=3)
         ttk.Button(bottom, text="Borrow").pack(side="left", padx=3)
         ttk.Button(bottom, text="Return").pack(side="left", padx=3)
         ttk.Button(bottom, text="Delete").pack(side="left", padx=3)
+
+        self.refresh()
+
+    def refresh(self):
+        # Clear table, then refill from Library
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        for book in self.lib.show_all():
+            borrower = self.lib.loans.get(book.id, "")
+            status = "Borrowed" if book.id in self.lib.loans else f"Available ({book.copies})"
+            # Use book.id as the row id, so we can find it later for Borrow/Return
+            self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower))
+
+    def add_book(self):
+        book_id = simpledialog.askinteger("Add Book", "Book ID (a number):", parent=self.root)
+        if book_id is None:
+            return
+        title = simpledialog.askstring("Add Book", "Title:", parent=self.root)
+        if not title:
+            return
+        author = simpledialog.askstring("Add Book", "Author:", parent=self.root)
+        if not author:
+            return
+        copies = simpledialog.askinteger("Add Book", "How many copies?", parent=self.root, minvalue=1)
+        if copies is None:
+            return
+
+        self.lib.insert(Book(book_id, title, author, copies))
+        self.refresh()
 
 def main():
     root = tk.Tk()
