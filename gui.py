@@ -42,21 +42,26 @@ class LibraryGUI:
         bottom.pack(fill="x")
 
         ttk.Button(bottom, text="Add Book", command=self.add_book).pack(side="left", padx=3)
-        ttk.Button(bottom, text="Borrow").pack(side="left", padx=3)
-        ttk.Button(bottom, text="Return").pack(side="left", padx=3)
+        ttk.Button(bottom, text="Borrow", command=self.borrow_book).pack(side="left", padx=3)
+        ttk.Button(bottom, text="Return", command=self.return_book).pack(side="left", padx=3)
         ttk.Button(bottom, text="Delete").pack(side="left", padx=3)
 
         self.refresh()
 
     def refresh(self):
-        # Clear table, then refill from Library
         for item in self.tree.get_children():
             self.tree.delete(item)
         for book in self.lib.show_all():
             borrower = self.lib.loans.get(book.id, "")
             status = "Borrowed" if book.id in self.lib.loans else f"Available ({book.copies})"
-            # Use book.id as the row id, so we can find it later for Borrow/Return
             self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower))
+
+    def _get_selected_id(self):
+        selected = self.tree.selection()
+        if not selected:
+            messagebox.showwarning("No book selected", "Click a book in the table first.", parent=self.root)
+            return None
+        return int(selected[0])
 
     def add_book(self):
         book_id = simpledialog.askinteger("Add Book", "Book ID (a number):", parent=self.root)
@@ -71,9 +76,29 @@ class LibraryGUI:
         copies = simpledialog.askinteger("Add Book", "How many copies?", parent=self.root, minvalue=1)
         if copies is None:
             return
-
         self.lib.insert(Book(book_id, title, author, copies))
         self.refresh()
+
+    def borrow_book(self):
+        book_id = self._get_selected_id()
+        if book_id is None:
+            return
+        borrower = simpledialog.askstring("Borrow Book", "Borrower name:", parent=self.root)
+        if not borrower:
+            return
+        if self.lib.borrow_book(book_id, borrower):
+            self.refresh()
+        else:
+            messagebox.showerror("Cannot borrow", "No copies available.", parent=self.root)
+
+    def return_book(self):
+        book_id = self._get_selected_id()
+        if book_id is None:
+            return
+        if self.lib.return_book(book_id):
+            self.refresh()
+        else:
+            messagebox.showerror("Cannot return", "That book is not on loan.", parent=self.root)
 
 def main():
     root = tk.Tk()
