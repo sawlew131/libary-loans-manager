@@ -19,7 +19,8 @@ class LibraryGUI:
         ttk.Label(top, text="Search:").pack(side="left")
         self.search_var = tk.StringVar()
         ttk.Entry(top, textvariable=self.search_var).pack(side="left", fill="x", expand=True, padx=(5, 5))
-        ttk.Button(top, text="Search").pack(side="left")
+        ttk.Button(top, text="Search", command=self.do_search).pack(side="left")
+        ttk.Button(top, text="Clear", command=self.clear_search).pack(side="left", padx=(3, 0))
 
         # --- Middle: book list ---
         middle = ttk.Frame(root, padding=(10, 0, 10, 10))
@@ -44,17 +45,27 @@ class LibraryGUI:
         ttk.Button(bottom, text="Add Book", command=self.add_book).pack(side="left", padx=3)
         ttk.Button(bottom, text="Borrow", command=self.borrow_book).pack(side="left", padx=3)
         ttk.Button(bottom, text="Return", command=self.return_book).pack(side="left", padx=3)
-        ttk.Button(bottom, text="Delete").pack(side="left", padx=3)
+        ttk.Button(bottom, text="Delete", command=self.delete_book).pack(side="left", padx=3)
 
         self.refresh()
 
-    def refresh(self):
+    def refresh(self, filter_text=""):
         for item in self.tree.get_children():
             self.tree.delete(item)
+        filter_text = filter_text.lower().strip()
         for book in self.lib.show_all():
+            if filter_text and filter_text not in book.title.lower() and filter_text not in book.author.lower():
+                continue
             borrower = self.lib.loans.get(book.id, "")
             status = "Borrowed" if book.id in self.lib.loans else f"Available ({book.copies})"
             self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower))
+
+    def do_search(self):
+        self.refresh(self.search_var.get())
+
+    def clear_search(self):
+        self.search_var.set("")
+        self.refresh()
 
     def _get_selected_id(self):
         selected = self.tree.selection()
@@ -99,6 +110,14 @@ class LibraryGUI:
             self.refresh()
         else:
             messagebox.showerror("Cannot return", "That book is not on loan.", parent=self.root)
+
+    def delete_book(self):
+        book_id = self._get_selected_id()
+        if book_id is None:
+            return
+        if messagebox.askyesno("Delete Book", "Delete this book?", parent=self.root):
+            self.lib.delete_book(book_id)
+            self.refresh()
 
 def main():
     root = tk.Tk()

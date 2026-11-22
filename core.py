@@ -74,3 +74,14 @@ class Library:
             self._inorder(node.left, books)
             books.append(node.book)
             self._inorder(node.right, books)
+
+    def delete_book(self, book_id):
+        # Rebuild the tree without this book - simplest safe BST delete
+        remaining = [b for b in self.show_all() if b.id != book_id]
+        if len(remaining) == len(self.show_all()):
+            return False
+        self.root = None
+        self.loans.pop(book_id, None)
+        for book in remaining:
+            self.insert(book)
+        return True
