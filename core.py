@@ -1,4 +1,6 @@
 # core.py - The Brain - No input(), No Tkinter here
+import json
+import os
 
 class Book:
     def __init__(self, book_id, title, author, copies):
@@ -85,3 +87,29 @@ class Library:
         for book in remaining:
             self.insert(book)
         return True
+
+    def save_to_file(self, filename="library.json"):
+        data = []
+        for b in self.show_all():
+            data.append({
+                "id": b.id,
+                "title": b.title,
+                "author": b.author,
+                "copies": b.copies,
+                "available": getattr(b, "available", b.copies)
+            })
+        with open(filename, "w") as f:
+            json.dump({"books": data, "loans": self.loans}, f, indent=2)
+
+    def load_from_file(self, filename="library.json"):
+        if not os.path.exists(filename):
+            return
+        with open(filename) as f:
+            data = json.load(f)
+        self.root = None
+        self.loans = {int(k): v for k, v in data.get("loans", {}).items()}
+        for d in data.get("books", []):
+            book = Book(d["id"], d["title"], d["author"], d["copies"])
+            if "available" in d:
+                book.available = d["available"]
+            self.insert(book)

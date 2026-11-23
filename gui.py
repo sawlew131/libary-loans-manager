@@ -121,8 +121,16 @@ class LibraryGUI:
 
 def main():
     root = tk.Tk()
-    LibraryGUI(root, Library())
+    lib = Library()
+    lib.load_from_file()
+    gui = LibraryGUI(root, lib)
+
+    def on_close():
+        lib.save_to_file()
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_close)
     root.mainloop()
 
 if __name__ == "__main__":
-    main()
+        main()
