@@ -26,12 +26,13 @@ class LibraryGUI:
         middle = ttk.Frame(root, padding=(10, 0, 10, 10))
         middle.pack(fill="both", expand=True)
 
-        columns = ("title", "author", "status", "borrower")
+        columns = ("title", "author", "status", "borrower", "due")
         self.tree = ttk.Treeview(middle, columns=columns, show="headings")
         self.tree.heading("title", text="Title")
         self.tree.heading("author", text="Author")
         self.tree.heading("status", text="Status")
         self.tree.heading("borrower", text="Borrower")
+        self.tree.heading("due", text = "Due Date")
         self.tree.column("title", width=250)
         self.tree.column("author", width=150)
         self.tree.column("status", width=100)
@@ -58,8 +59,11 @@ class LibraryGUI:
                 continue
             borrower = self.lib.loans.get(book.id, "")
             status = "Borrowed" if book.id in self.lib.loans else f"Available ({book.copies})"
-            self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower))
-
+            due = self.lib.get_due_date(book.id)
+            if self.lib.is_overdue(book.id):
+                status = "OVERDUE"
+                due = due + " - OVERDUE"
+            self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower, due))
     def do_search(self):
         self.refresh(self.search_var.get())
 

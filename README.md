@@ -16,4 +16,21 @@ Books are stored sorted by ID, so listing and finding books is fast.
 
 ## Run it
 
-GUI (main app):
+GUI (main app): 
+py gui.py
+CLI(terminal version):
+py cli.py
+
+
+## Run tests 
+python -m pytest -v
+
+
+## Files
+
+- `core.py` - Book and Library logic (BST, borrow/return, save/load)
+- `gui.py` - Tkinter GUI
+- `cli.py` - Terminal version
+- `test_core.py` - Tests for core logic
+
+
