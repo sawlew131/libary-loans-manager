@@ -38,6 +38,7 @@ class LibraryGUI:
         self.tree.column("status", width=100)
         self.tree.column("borrower", width=150)
         self.tree.pack(fill="both", expand=True)
+        self.tree.tag_configure("overdue", background="red", foreground="white")
 
         # --- Bottom: buttons ---
         bottom = ttk.Frame(root, padding=10)
@@ -63,7 +64,8 @@ class LibraryGUI:
             if self.lib.is_overdue(book.id):
                 status = "OVERDUE"
                 due = due + " - OVERDUE"
-            self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower, due))
+            tag = ("overdue",) if status == "OVERDUE" else ()
+            self.tree.insert("", "end", iid=str(book.id), values=(book.title, book.author, status, borrower, due), tags=tag)
     def do_search(self):
         self.refresh(self.search_var.get())
 
