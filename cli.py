@@ -9,6 +9,7 @@ def show_help():
     print("  find <id>")
     print("  borrow <id> <name>")
     print("  return <id>")
+    print("  delete <id>")
     print("  help")
     print("  quit")
 
@@ -62,6 +63,9 @@ while True:
     elif cmd == "return":
         ok = lib.return_book(int(parts[1]))
         print("Returned!" if ok else "Can't return - not on loan")
+    elif cmd == "delete":
+        ok = lib.delete_book(int(parts[1]))
+        print("Deleted!" if ok else "Can't delete - not found")
 
     else:
         print("Unknown command - type 'help'")
